@@ -21,6 +21,28 @@ class PostgresRepository extends BaseRepository {
     );
     return rows[0];
   }
+
+  async update(id, updates) {
+    const existing = await this.findById(id);
+    if (!existing) return null;
+
+    const title = updates.title !== undefined ? updates.title : existing.title;
+    const completed =
+      updates.completed !== undefined ? updates.completed : existing.completed;
+
+    const { rows } = await this.pool.query(
+      "UPDATE tasks SET title = $1, completed = $2 WHERE id = $3 RETURNING id, title, completed",
+      [title, Boolean(completed), Number(id)],
+    );
+    return rows[0] || null;
+  }
+
+  async delete(id) {
+    const res = await this.pool.query("DELETE FROM tasks WHERE id = $1", [
+      Number(id),
+    ]);
+    return res.rowCount > 0;
+  }
 }
 
 module.exports = PostgresRepository;
