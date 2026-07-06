@@ -6,10 +6,19 @@ class PostgresRepository extends BaseRepository {
     this.pool = pool;
   }
 
-  async findAll({ completed, sort } = {}) {
+  async findAll({ search, completed, sort } = {}) {
     let query = "SELECT id, title, completed FROM tasks";
     const conditions = [];
     const params = [];
+
+    search = search?.trim() || "";
+    if (search !== "") {
+      /*
+        `%${...}%` SQL Wildcard Characters, representing zero or more charactesrs.
+      */
+      params.push(`%${search}%`);
+      conditions.push(`title ILIKE $${params.length}`);
+    }
 
     if (completed !== undefined) {
       const isCompleted = [true, "true"].includes(completed);
