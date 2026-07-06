@@ -6,6 +6,21 @@ class PostgresRepository extends BaseRepository {
     this.pool = pool;
   }
 
+  async findAll({ sort } = {}) {
+    let query = "SELECT id, title, completed FROM tasks";
+
+    if (sort === "title" || sort === "asc") {
+      query += " ORDER BY title ASC";
+    } else if (sort === "desc") {
+      query += " ORDER BY title DESC";
+    } else {
+      query += " ORDER BY id ASC";
+    }
+
+    const { rows } = await this.pool.query(query);
+    return rows;
+  }
+
   async findById(id) {
     const { rows } = await this.pool.query(
       "SELECT id, title, completed FROM tasks WHERE id = $1",
