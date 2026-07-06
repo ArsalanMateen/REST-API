@@ -6,8 +6,20 @@ class PostgresRepository extends BaseRepository {
     this.pool = pool;
   }
 
-  async findAll({ sort } = {}) {
+  async findAll({ completed, sort } = {}) {
     let query = "SELECT id, title, completed FROM tasks";
+    const conditions = [];
+    const params = [];
+
+    if (completed !== undefined) {
+      const isCompleted = [true, "true"].includes(completed);
+      params.push(isCompleted);
+      conditions.push(`completed = $${params.length}`);
+    }
+
+    if (conditions.length > 0) {
+      query += " WHERE " + conditions.join(" AND ");
+    }
 
     if (sort === "title" || sort === "asc") {
       query += " ORDER BY title ASC";
@@ -17,7 +29,7 @@ class PostgresRepository extends BaseRepository {
       query += " ORDER BY id ASC";
     }
 
-    const { rows } = await this.pool.query(query);
+    const { rows } = await this.pool.query(query, params);
     return rows;
   }
 
