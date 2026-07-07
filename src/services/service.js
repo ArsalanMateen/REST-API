@@ -28,6 +28,20 @@ class Service {
     }
     return { data: item };
   }
+
+  async create({ title } = {}) {
+    if (!isValidTitle(title)) {
+      return {
+        error: "Bad Request: empty or invalid title.",
+        statusCode: 400,
+      };
+    }
+    const created = await this.repo.create({
+      title: title.trim(),
+      completed: false,
+    });
+    return { data: created, statusCode: 201 };
+  }
 }
 
 module.exports = Service;
