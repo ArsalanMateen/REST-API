@@ -51,6 +51,32 @@ function createRouter(service) {
     }
   });
 
+  // update a specific task
+  router.put("/tasks/:id", async (req, res, next) => {
+    try {
+      const result = await service.update(req.params.id, req.body);
+      if (result.error) {
+        return res.status(result.statusCode).json({ message: result.error });
+      }
+      res.status(200).json(result.data);
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // delete a specific task
+  router.delete("/tasks/:id", async (req, res, next) => {
+    try {
+      const result = await service.delete(req.params.id);
+      if (result.error) {
+        return res.status(result.statusCode).json({ message: result.error });
+      }
+      res.status(204).send();
+    } catch (err) {
+      next(err);
+    }
+  });
+
   return router;
 }
 
