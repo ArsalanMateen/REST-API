@@ -31,6 +31,26 @@ function createRouter(service) {
     }
   });
 
+  // create new task
+  router.post("/tasks", async (req, res, next) => {
+    try {
+      const result = await service.create(req.body);
+      if (result.error) {
+        return res.status(result.statusCode).json({ message: result.error });
+      }
+      res.status(201).json({
+        message: "Task created",
+        task: {
+          id: result.data.id,
+          title: result.data.title,
+          completed: result.data.completed,
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  });
+
   return router;
 }
 
