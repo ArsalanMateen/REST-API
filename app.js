@@ -27,6 +27,15 @@ app.get("/", (req, res) => {
   });
 });
 
+// global error handler
+app.use((err, req, res, next) => {
+  console.error("Unhandled application error:", err);
+  res.status(500).json({
+    message: "Internal Server Error",
+    error: process.env.NODE_ENV === "development" ? err.message : undefined,
+  });
+});
+
 if (require.main === module) {
   app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
