@@ -19,6 +19,14 @@ const router = createRouter(service);
 
 app.use(router);
 
+app.get("/", (req, res) => {
+  res.json({
+    name: "API",
+    version: "1.0",
+    endpoints: ["/tasks", "/tasks/:id", "/health", "/docs"],
+  });
+});
+
 if (require.main === module) {
   app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
