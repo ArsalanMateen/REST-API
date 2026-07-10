@@ -25,6 +25,29 @@ const getRedisClient = () => {
   return redisClient;
 };
 
+const pingRedis = async () => {
+  try {
+    const client = getRedisClient();
+    if (client.status === "wait" || client.status === "close") {
+      await client.connect();
+    }
+    const start = Date.now();
+    const response = await client.ping();
+    const latencyMs = Date.now() - start;
+    return {
+      status: "connected",
+      ping: response,
+      latencyMs,
+    };
+  } catch (err) {
+    return {
+      status: "disconnected",
+      error: err.message,
+    };
+  }
+};
+
 module.exports = {
   getRedisClient,
+  pingRedis,
 };
