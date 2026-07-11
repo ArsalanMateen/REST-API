@@ -43,8 +43,9 @@ app.get("/health", async (req, res) => {
   const redisStatus = await pingRedis();
   console.log("Redis status is", redisStatus.status);
 
-  res.json({
-    status: "ok",
+  const isHealthy = dbStatus === "connected";
+  res.status(isHealthy ? 200 : 503).json({
+    status: isHealthy ? "ok" : "degraded",
     database: dbStatus,
     redis: redisStatus,
     timestamp: new Date().toISOString(),
