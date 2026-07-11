@@ -3,6 +3,8 @@ require("dotenv").config();
 const express = require("express");
 
 const { pool } = require("./src/db");
+const { pingRedis } = require("./src/redis");
+
 const PostgresRepository = require("./src/repositories/postgresRepo");
 const Service = require("./src/services/service");
 const createRouter = require("./src/routes/routes");
@@ -24,6 +26,28 @@ app.get("/", (req, res) => {
     name: "API",
     version: "1.0",
     endpoints: ["/tasks", "/tasks/:id", "/health", "/docs"],
+  });
+});
+
+// health check
+app.get("/health", async (req, res) => {
+  let dbStatus = "connected";
+  try {
+    await pool.query("SELECT 1");
+    console.log("PostgreSQL is connected.");
+  } catch (err) {
+    dbStatus = `disconnected: ${err.message}`;
+    console.error(" PostgreSQL is unavailable:", err.message);
+  }
+
+  const redisStatus = await pingRedis();
+  console.log("Redis status is", redisStatus.status);
+
+  res.json({
+    status: "ok",
+    database: dbStatus,
+    redis: redisStatus,
+    timestamp: new Date().toISOString(),
   });
 });
 
