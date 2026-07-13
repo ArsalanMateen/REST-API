@@ -1,6 +1,8 @@
 require("dotenv").config();
 
 const express = require("express");
+const swaggerUi = require("swagger-ui-express");
+const swaggerDoc = require("./openapi.json");
 
 const { pool } = require("./src/db");
 const { pingRedis } = require("./src/redis");
@@ -13,6 +15,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 
 // dependency injection
 const repository = new PostgresRepository(pool);
