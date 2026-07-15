@@ -4,10 +4,11 @@ const express = require("express");
 const swaggerUi = require("swagger-ui-express");
 const swaggerDoc = require("./openapi.json");
 
-const { pool } = require("./src/db");
+const { pool, ensureSchema } = require("./src/db");
 const { pingRedis } = require("./src/redis");
 
 const PostgresRepository = require("./src/repositories/postgresRepo");
+
 const Service = require("./src/services/service");
 const createRouter = require("./src/routes/routes");
 
@@ -19,6 +20,7 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 
 // dependency injection
 const repository = new PostgresRepository(pool);
+
 const service = new Service(repository);
 const router = createRouter(service);
 
@@ -64,10 +66,22 @@ app.use((err, req, res, next) => {
   });
 });
 
-if (require.main === module) {
+// initialize database schema and start server
+async function startServer() {
+  try {
+    await ensureSchema();
+    console.log("Database initialized successfully.");
+  } catch (err) {
+    console.warn("Could not connect to database: ", err.message);
+  }
+
   app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
   });
+}
+
+if (require.main === module) {
+  startServer();
 }
 
 module.exports = app;
